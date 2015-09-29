@@ -31,17 +31,16 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE. */
 
 package com.qualcomm.ftcrobotcontroller.opmodes;
 
-import com.qualcomm.robotcore.eventloop.opmode.OpMode;
 import com.qualcomm.robotcore.hardware.DcMotor;
-import com.qualcomm.robotcore.hardware.Servo;
-import com.qualcomm.robotcore.util.Range;
+//import com.qualcomm.robotcore.hardware.Servo;
+import com.qualcomm.ftcrobotcontroller.opmodes.GamepadTask;
 
 /**
  * TeleOp Mode
  * <p>
  * Enables control of the robot via the gamepad
  */
-public class K9TeleOp extends OpMode {
+public class K9TeleOp extends Robot {
 	
 	/*
 	 * Note: the configuration of the servos is such that
@@ -49,27 +48,27 @@ public class K9TeleOp extends OpMode {
 	 * Also, as the claw servo approaches 0, the claw opens up (drops the game element).
 	 */
 	// TETRIX VALUES.
-	final static double ARM_MIN_RANGE  = 0.20;
-	final static double ARM_MAX_RANGE  = 0.90;
-	final static double CLAW_MIN_RANGE  = 0.20;
-	final static double CLAW_MAX_RANGE  = 0.7;
+	//final static double ARM_MIN_RANGE  = 0.20;
+	//final static double ARM_MAX_RANGE  = 0.90;
+	//final static double CLAW_MIN_RANGE  = 0.20;
+	//final static double CLAW_MAX_RANGE  = 0.7;
 
 	// position of the arm servo.
-	double armPosition;
+	//double armPosition;
 
 	// amount to change the arm servo position.
-	double armDelta = 0.1;
+	//double armDelta = 0.1;
 
 	// position of the claw servo
-	double clawPosition;
+	//double clawPosition;
 
 	// amount to change the claw servo position by
-	double clawDelta = 0.1;
+	//double clawDelta = 0.1;
 
 	DcMotor motorRight;
 	DcMotor motorLeft;
-	Servo claw;
-	Servo arm;
+	//Servo claw;
+	//Servo arm;
 
 	/**
 	 * Constructor
@@ -79,9 +78,9 @@ public class K9TeleOp extends OpMode {
 	}
 
 	/*
-	 * Code to run when the op mode is first enabled goes here
+	 * Code to run when the op mode is initialized goes here
 	 * 
-	 * @see com.qualcomm.robotcore.eventloop.opmode.OpMode#start()
+	 * @see com.qualcomm.robotcore.eventloop.opmode.OpMode#init()
 	 */
 	@Override
 	public void init() {
@@ -103,26 +102,71 @@ public class K9TeleOp extends OpMode {
 		 *    "servo_1" controls the arm joint of the manipulator.
 		 *    "servo_6" controls the claw joint of the manipulator.
 		 */
-		motorRight = hardwareMap.dcMotor.get("motor_2");
-		motorLeft = hardwareMap.dcMotor.get("motor_1");
+		motorRight = hardwareMap.dcMotor.get("Right_Motor");
+		motorLeft = hardwareMap.dcMotor.get("Left_Motor");
 		motorLeft.setDirection(DcMotor.Direction.REVERSE);
 		
-		arm = hardwareMap.servo.get("servo_1");
-		claw = hardwareMap.servo.get("servo_6");
+		//arm = hardwareMap.servo.get("servo_1");
+		//claw = hardwareMap.servo.get("servo_6");
 
 		// assign the starting position of the wrist and claw
-		armPosition = 0.2;
-		clawPosition = 0.2;
+		//armPosition = 0.2;
+		//clawPosition = 0.2;
+	}
+
+	@Override
+	public void handleEvent(RobotEvent e) {
+		GamepadTask.GamepadEvent event = (GamepadTask.GamepadEvent) e;
+
+		switch (event.kind) {
+			case BUTTON_A_UP:
+				motorRight.setPower(.5);
+				break;
+			case BUTTON_B_DOWN:
+				break;
+			case BUTTON_B_UP:
+				break;
+			case BUTTON_X_DOWN:
+				break;
+			case BUTTON_X_UP:
+				break;
+			case BUTTON_Y_DOWN:
+				break;
+			case BUTTON_Y_UP:
+				break;
+		}
 	}
 
 	/*
-	 * This method will be called repeatedly in a loop
-	 * 
-	 * @see com.qualcomm.robotcore.eventloop.opmode.OpMode#run()
-	 */
+         * This method will be called repeatedly in a loop
+         *
+         * @see com.qualcomm.robotcore.eventloop.opmode.OpMode#run()
+         */
 	@Override
 	public void loop() {
 
+		RobotEvent e;
+
+        /*
+         * This is a straight FIFO queue.  Pull an event off the queue, process it,
+         * move on to the next one.
+         */
+		e = events.poll();
+		while (e != null) {
+			handleEvent(e);
+			e = events.poll();
+		}
+
+        /*
+         * A list of tasks to give timeslices to.  A task remains in the list
+         * until it tells the Robot that it is finished (true: I'm done, false: I have
+         * more work to do), at which point it is stopped.
+         */
+		for (RobotTask t : tasks) {
+			if (t.timeslice()) {
+				t.stop();
+			}
+		}
 		/*
 		 * Gamepad 1
 		 * 
@@ -134,53 +178,53 @@ public class K9TeleOp extends OpMode {
 		// 1 is full down
 		// direction: left_stick_x ranges from -1 to 1, where -1 is full left
 		// and 1 is full right
-		float throttle = -gamepad1.left_stick_y;
-		float direction = gamepad1.left_stick_x;
-		float right = throttle - direction;
-		float left = throttle + direction;
+		//float throttle = -gamepad1.left_stick_y;
+		//float direction = gamepad1.left_stick_x;
+		//float right = throttle - direction;
+		//float left = throttle + direction;
 
 		// clip the right/left values so that the values never exceed +/- 1
-		right = Range.clip(right, -1, 1);
-		left = Range.clip(left, -1, 1);
+		//right = Range.clip(right, -1, 1);
+		//left = Range.clip(left, -1, 1);
 
 		// scale the joystick value to make it easier to control
 		// the robot more precisely at slower speeds.
-		right = (float)scaleInput(right);
-		left =  (float)scaleInput(left);
+		//right = (float)scaleInput(right);
+		//left =  (float)scaleInput(left);
 		
 		// write the values to the motors
-		motorRight.setPower(right);
-		motorLeft.setPower(left);
+		//motorRight.setPower(1.0);
+		//motorLeft.setPower(left);
 
 		// update the position of the arm.
-		if (gamepad1.a) {
+		//if (gamepad1.a) {
 			// if the A button is pushed on gamepad1, increment the position of
 			// the arm servo.
-			armPosition += armDelta;
-		}
+		//	armPosition += armDelta;
+		//}
 
-		if (gamepad1.y) {
+		//if (gamepad1.y) {
 			// if the Y button is pushed on gamepad1, decrease the position of
 			// the arm servo.
-			armPosition -= armDelta;
-		}
+		//	armPosition -= armDelta;
+		//}
 
 		// update the position of the claw
-		if (gamepad1.x) {
-			clawPosition += clawDelta;
-		}
+		//if (gamepad1.x) {
+		//	clawPosition += clawDelta;
+		//}
 
-		if (gamepad1.b) {
-			clawPosition -= clawDelta;
-		}
+		//if (gamepad1.b) {
+		//	clawPosition -= clawDelta;
+		//}
 
         // clip the position values so that they never exceed their allowed range.
-        armPosition = Range.clip(armPosition, ARM_MIN_RANGE, ARM_MAX_RANGE);
-        clawPosition = Range.clip(clawPosition, CLAW_MIN_RANGE, CLAW_MAX_RANGE);
+        //armPosition = Range.clip(armPosition, ARM_MIN_RANGE, ARM_MAX_RANGE);
+        //clawPosition = Range.clip(clawPosition, CLAW_MIN_RANGE, CLAW_MAX_RANGE);
 
 		// write position values to the wrist and claw servo
-		arm.setPosition(armPosition);
-		claw.setPosition(clawPosition);
+		//arm.setPosition(armPosition);
+		//claw.setPosition(clawPosition);
 
 
 
@@ -190,11 +234,11 @@ public class K9TeleOp extends OpMode {
 		 * will return a null value. The legacy NXT-compatible motor controllers
 		 * are currently write only.
 		 */
-        telemetry.addData("Text", "*** Robot Data***");
-        telemetry.addData("arm", "arm:  " + String.format("%.2f", armPosition));
-        telemetry.addData("claw", "claw:  " + String.format("%.2f", clawPosition));
-        telemetry.addData("left tgt pwr",  "left  pwr: " + String.format("%.2f", left));
-        telemetry.addData("right tgt pwr", "right pwr: " + String.format("%.2f", right));
+        //telemetry.addData("Text", "*** Robot Data***");
+        //telemetry.addData("arm", "arm:  " + String.format("%.2f", armPosition));
+        //telemetry.addData("claw", "claw:  " + String.format("%.2f", clawPosition));
+        //telemetry.addData("left tgt pwr",  "left  pwr: " + String.format("%.2f", left));
+        //telemetry.addData("right tgt pwr", "right pwr: " + String.format("%.2f", right));
 
 	}
 
@@ -207,8 +251,7 @@ public class K9TeleOp extends OpMode {
 	public void stop() {
 
 	}
-
-    	
+	
 	/*
 	 * This method scales the joystick input so for low joystick values, the 
 	 * scaled value is less than linear.  This is to make it easier to drive
@@ -220,26 +263,19 @@ public class K9TeleOp extends OpMode {
 		
 		// get the corresponding index for the scaleInput array.
 		int index = (int) (dVal * 16.0);
-		
-		// index should be positive.
 		if (index < 0) {
 			index = -index;
-		}
-
-		// index cannot exceed size of array minus 1.
-		if (index > 16) {
+		} else if (index > 16) {
 			index = 16;
 		}
-
-		// get value from the array.
+		
 		double dScale = 0.0;
 		if (dVal < 0) {
 			dScale = -scaleArray[index];
 		} else {
 			dScale = scaleArray[index];
 		}
-
-		// return scaled value.
+		
 		return dScale;
 	}
 
